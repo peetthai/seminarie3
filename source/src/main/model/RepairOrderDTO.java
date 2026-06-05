@@ -3,28 +3,42 @@ package model;
 import java.util.List;
 
 /**
- * Represents a completed repair order issued at the end of a repair session.
- * Instances are immutable.
+ * Data Transfer Object that carries the details of a completed repair order
+ * across layer boundaries, including from the model to the view and into the
+ * repair order registry. Instances are immutable.
  */
-public class RepairOrder {
+public class RepairOrderDTO {
+    private final String repairOrderID;
     private final BikeDTO bike;
     private final List<TaskDTO> tasks;
     private final String diagnosticReport;
     private final Amount total;
 
     /**
-     * Creates a RepairOrder with all details of the completed repair.
+     * Creates a RepairOrderDTO with all details of the completed repair.
      *
+     * @param repairOrderID    The unique identifier of the repair order.
      * @param bike             The bike that was repaired.
      * @param tasks            The list of repair tasks performed.
      * @param diagnosticReport The mechanic's diagnostic notes.
      * @param total            The total cost of all repair tasks.
      */
-    RepairOrder(BikeDTO bike, List<TaskDTO> tasks, String diagnosticReport, Amount total) {
+    public RepairOrderDTO(String repairOrderID, BikeDTO bike, List<TaskDTO> tasks,
+                          String diagnosticReport, Amount total) {
+        this.repairOrderID = repairOrderID;
         this.bike = bike;
         this.tasks = tasks;
         this.diagnosticReport = diagnosticReport;
         this.total = total;
+    }
+
+    /**
+     * Returns the unique identifier of this repair order.
+     *
+     * @return The repair order ID string.
+     */
+    public String getRepairOrderID() {
+        return repairOrderID;
     }
 
     /**

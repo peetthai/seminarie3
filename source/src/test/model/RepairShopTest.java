@@ -15,6 +15,10 @@ class RepairShopTest {
         repairShop.startRepair();
     }
 
+    private BikeDTO bike(String bikeID, String customerID, String customerName) {
+        return new BikeDTO(bikeID, new CustomerDTO(customerID, customerName, "070-000 00 00"));
+    }
+
     @Test
     void addTaskAfterStartReturnsTaskCostAsRunningTotal() {
         TaskDTO task = new TaskDTO("Brake Pad Replacement", new Amount(350));
@@ -31,37 +35,53 @@ class RepairShopTest {
 
     @Test
     void endRepairAfterRegisterBikeAndTasksReturnsRepairOrderWithBike() {
-        BikeDTO bike = new BikeDTO("BIKE-002", "Bob Lindqvist");
-        repairShop.registerBike(bike);
+        repairShop.registerBike(bike("BIKE-002", "CUST-002", "Bob Lindqvist"));
         repairShop.addTask(new TaskDTO("Battery Check", new Amount(200)));
-        RepairOrder repairOrder = repairShop.endRepair();
+        RepairOrderDTO repairOrder = repairShop.endRepair();
         assertEquals("BIKE-002", repairOrder.getBike().getBikeID());
     }
 
     @Test
     void endRepairReturnsRepairOrderWithCorrectTotal() {
-        repairShop.registerBike(new BikeDTO("BIKE-002", "Bob Lindqvist"));
+        repairShop.registerBike(bike("BIKE-002", "CUST-002", "Bob Lindqvist"));
         repairShop.addTask(new TaskDTO("Battery Check", new Amount(200)));
         repairShop.addTask(new TaskDTO("Chain Lubrication", new Amount(150)));
-        RepairOrder repairOrder = repairShop.endRepair();
+        RepairOrderDTO repairOrder = repairShop.endRepair();
         assertEquals(350, repairOrder.getTotal().getValue(), 0.001);
     }
 
     @Test
+    void endRepairAssignsANonNullRepairOrderId() {
+        repairShop.registerBike(bike("BIKE-001", "CUST-001", "Alice Svensson"));
+        RepairOrderDTO repairOrder = repairShop.endRepair();
+        assertNotNull(repairOrder.getRepairOrderID());
+    }
+
+    @Test
+    void twoConsecutiveRepairsGetDifferentRepairOrderIds() {
+        repairShop.registerBike(bike("BIKE-001", "CUST-001", "Alice Svensson"));
+        RepairOrderDTO first = repairShop.endRepair();
+        repairShop.startRepair();
+        repairShop.registerBike(bike("BIKE-002", "CUST-002", "Bob Lindqvist"));
+        RepairOrderDTO second = repairShop.endRepair();
+        assertNotEquals(first.getRepairOrderID(), second.getRepairOrderID());
+    }
+
+    @Test
     void startRepairTwiceCreatesNewSessionWithZeroTotal() {
-        repairShop.registerBike(new BikeDTO("BIKE-001", "Alice Svensson"));
+        repairShop.registerBike(bike("BIKE-001", "CUST-001", "Alice Svensson"));
         repairShop.addTask(new TaskDTO("Brake Pad Replacement", new Amount(350)));
         repairShop.startRepair();
-        repairShop.registerBike(new BikeDTO("BIKE-002", "Bob Lindqvist"));
-        RepairOrder repairOrder = repairShop.endRepair();
+        repairShop.registerBike(bike("BIKE-002", "CUST-002", "Bob Lindqvist"));
+        RepairOrderDTO repairOrder = repairShop.endRepair();
         assertEquals(0, repairOrder.getTotal().getValue(), 0.001);
     }
 
     @Test
     void enterDiagnosticReportIsReflectedInRepairOrder() {
-        repairShop.registerBike(new BikeDTO("BIKE-003", "Carl Johansson"));
+        repairShop.registerBike(bike("BIKE-003", "CUST-003", "Carl Johansson"));
         repairShop.enterDiagnosticReport("Tire replaced successfully.");
-        RepairOrder repairOrder = repairShop.endRepair();
+        RepairOrderDTO repairOrder = repairShop.endRepair();
         assertEquals("Tire replaced successfully.", repairOrder.getDiagnosticReport());
     }
 }

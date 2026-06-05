@@ -28,9 +28,9 @@ class BikeRegistryTest {
     }
 
     @Test
-    void findBikeWithExistingIdReturnsCorrectOwnerName() {
+    void findBikeWithExistingIdReturnsCorrectCustomerName() {
         BikeDTO bike = bikeRegistry.findBike("BIKE-002");
-        assertEquals("Bob Lindqvist", bike.getOwnerName());
+        assertEquals("Bob Lindqvist", bike.getCustomer().getName());
     }
 
     @Test

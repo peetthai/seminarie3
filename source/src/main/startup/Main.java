@@ -1,8 +1,7 @@
 package startup;
 
 import controller.Controller;
-import integration.BikeRegistry;
-import integration.RepairTaskCatalog;
+import integration.RegistryCreator;
 import model.RepairShop;
 import view.View;
 
@@ -18,10 +17,9 @@ public class Main {
      * @param args Command-line arguments (not used).
      */
     public static void main(String[] args) {
-        BikeRegistry bikeRegistry = new BikeRegistry();
-        RepairTaskCatalog taskCatalog = new RepairTaskCatalog();
+        RegistryCreator registryCreator = new RegistryCreator();
         RepairShop repairShop = new RepairShop();
-        Controller controller = new Controller(repairShop, bikeRegistry, taskCatalog);
+        Controller controller = new Controller(repairShop, registryCreator);
         View view = new View(controller);
         view.runFakeExecution();
     }

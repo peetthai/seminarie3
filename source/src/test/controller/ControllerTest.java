@@ -2,12 +2,14 @@ package controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import integration.BikeRegistry;
-import integration.RepairTaskCatalog;
+import integration.RegistryCreator;
 import model.Amount;
 import model.BikeDTO;
-import model.RepairOrder;
+import model.CustomerDTO;
+import model.RepairOrderDTO;
 import model.RepairShop;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,10 +19,9 @@ class ControllerTest {
 
     @BeforeEach
     void setUp() {
-        BikeRegistry bikeRegistry = new BikeRegistry();
-        RepairTaskCatalog taskCatalog = new RepairTaskCatalog();
+        RegistryCreator registryCreator = new RegistryCreator();
         RepairShop repairShop = new RepairShop();
-        controller = new Controller(repairShop, bikeRegistry, taskCatalog);
+        controller = new Controller(repairShop, registryCreator);
         controller.startNewRepair();
     }
 
@@ -75,14 +76,14 @@ class ControllerTest {
     void endRepairReturnsNonNullRepairOrder() {
         controller.enterBikeID("BIKE-001");
         controller.addRepairTask("Battery Check");
-        RepairOrder repairOrder = controller.endRepair();
+        RepairOrderDTO repairOrder = controller.endRepair();
         assertNotNull(repairOrder);
     }
 
     @Test
     void endRepairReturnsRepairOrderWithCorrectBikeId() {
         controller.enterBikeID("BIKE-002");
-        RepairOrder repairOrder = controller.endRepair();
+        RepairOrderDTO repairOrder = controller.endRepair();
         assertEquals("BIKE-002", repairOrder.getBike().getBikeID());
     }
 
@@ -91,7 +92,7 @@ class ControllerTest {
         controller.enterBikeID("BIKE-001");
         controller.addRepairTask("Battery Check");
         controller.addRepairTask("Chain Lubrication");
-        RepairOrder repairOrder = controller.endRepair();
+        RepairOrderDTO repairOrder = controller.endRepair();
         assertEquals(350, repairOrder.getTotal().getValue(), 0.001);
     }
 
@@ -99,7 +100,46 @@ class ControllerTest {
     void enterDiagnosticReportIsReflectedInFinalRepairOrder() {
         controller.enterBikeID("BIKE-003");
         controller.enterDiagnosticReport("Chain replaced and tested.");
-        RepairOrder repairOrder = controller.endRepair();
+        RepairOrderDTO repairOrder = controller.endRepair();
         assertEquals("Chain replaced and tested.", repairOrder.getDiagnosticReport());
+    }
+
+    @Test
+    void endRepairSavesRepairOrderSoItCanBeFoundById() {
+        controller.enterBikeID("BIKE-001");
+        controller.addRepairTask("Battery Check");
+        RepairOrderDTO saved = controller.endRepair();
+        RepairOrderDTO found = controller.findRepairOrder(saved.getRepairOrderID());
+        assertEquals(saved.getRepairOrderID(), found.getRepairOrderID());
+    }
+
+    @Test
+    void findRepairOrderWithUnknownIdReturnsNull() {
+        assertNull(controller.findRepairOrder("RO-999"));
+    }
+
+    @Test
+    void findCustomerWithExistingIdReturnsCorrectName() {
+        CustomerDTO customer = controller.findCustomer("CUST-001");
+        assertEquals("Alice Svensson", customer.getName());
+    }
+
+    @Test
+    void findCustomerWithUnknownIdReturnsNull() {
+        assertNull(controller.findCustomer("CUST-999"));
+    }
+
+    @Test
+    void findRepairOrdersForCustomerReturnsSavedOrderForThatCustomer() {
+        controller.enterBikeID("BIKE-001");
+        controller.endRepair();
+        List<RepairOrderDTO> history = controller.findRepairOrdersForCustomer("CUST-001");
+        assertEquals(1, history.size());
+    }
+
+    @Test
+    void findRepairOrdersForCustomerWithNoOrdersReturnsEmptyList() {
+        List<RepairOrderDTO> history = controller.findRepairOrdersForCustomer("CUST-002");
+        assertTrue(history.isEmpty());
     }
 }

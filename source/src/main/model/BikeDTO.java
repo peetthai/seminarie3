@@ -2,21 +2,21 @@ package model;
 
 /**
  * Data Transfer Object that carries bike information across layer boundaries.
- * Instances are immutable.
+ * Each bike is associated with the customer who owns it. Instances are immutable.
  */
 public class BikeDTO {
     private final String bikeID;
-    private final String ownerName;
+    private final CustomerDTO customer;
 
     /**
-     * Creates a BikeDTO with the specified bike ID and owner name.
+     * Creates a BikeDTO with the specified bike ID and owning customer.
      *
-     * @param bikeID    The unique identifier of the bike.
-     * @param ownerName The full name of the bike's owner.
+     * @param bikeID   The unique identifier of the bike.
+     * @param customer The customer who owns the bike.
      */
-    public BikeDTO(String bikeID, String ownerName) {
+    public BikeDTO(String bikeID, CustomerDTO customer) {
         this.bikeID = bikeID;
-        this.ownerName = ownerName;
+        this.customer = customer;
     }
 
     /**
@@ -29,11 +29,11 @@ public class BikeDTO {
     }
 
     /**
-     * Returns the full name of the bike's owner.
+     * Returns the customer who owns this bike.
      *
-     * @return The owner's name.
+     * @return The owning {@link CustomerDTO}.
      */
-    public String getOwnerName() {
-        return ownerName;
+    public CustomerDTO getCustomer() {
+        return customer;
     }
 }

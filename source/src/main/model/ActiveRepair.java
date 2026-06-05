@@ -47,11 +47,12 @@ class ActiveRepair {
     /**
      * Ends the repair session and returns a completed repair order.
      *
-     * @return The {@link RepairOrder} summarising all repair details.
+     * @param repairOrderID The unique identifier assigned to this repair order.
+     * @return The {@link RepairOrderDTO} summarising all repair details.
      */
-    RepairOrder endRepair() {
+    RepairOrderDTO endRepair(String repairOrderID) {
         List<TaskDTO> immutableTasks = Collections.unmodifiableList(new ArrayList<>(tasks));
-        return new RepairOrder(bike, immutableTasks, diagnosticReport, total);
+        return new RepairOrderDTO(repairOrderID, bike, immutableTasks, diagnosticReport, total);
     }
 
     private Amount calculateTotal() {

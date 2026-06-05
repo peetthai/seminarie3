@@ -1,12 +1,18 @@
 package controller;
 
 import integration.BikeRegistry;
+import integration.CustomerRegistry;
+import integration.RegistryCreator;
+import integration.RepairOrderRegistry;
 import integration.RepairTaskCatalog;
 import model.Amount;
 import model.BikeDTO;
-import model.RepairOrder;
+import model.CustomerDTO;
+import model.RepairOrderDTO;
 import model.RepairShop;
 import model.TaskDTO;
+
+import java.util.List;
 
 /**
  * Coordinates use-case execution between the view and the model and integration layers.
@@ -16,19 +22,22 @@ public class Controller {
     private final RepairShop repairShop;
     private final BikeRegistry bikeRegistry;
     private final RepairTaskCatalog taskCatalog;
+    private final CustomerRegistry customerRegistry;
+    private final RepairOrderRegistry repairOrderRegistry;
 
     /**
-     * Creates a Controller wired to the given dependencies.
+     * Creates a Controller wired to the model and to the registries provided by
+     * the given registry creator.
      *
-     * @param repairShop   The repair shop facade (model layer).
-     * @param bikeRegistry The bike registry (integration layer).
-     * @param taskCatalog  The repair task catalog (integration layer).
+     * @param repairShop      The repair shop facade (model layer).
+     * @param registryCreator The creator that holds all integration-layer registries.
      */
-    public Controller(RepairShop repairShop, BikeRegistry bikeRegistry,
-                      RepairTaskCatalog taskCatalog) {
+    public Controller(RepairShop repairShop, RegistryCreator registryCreator) {
         this.repairShop = repairShop;
-        this.bikeRegistry = bikeRegistry;
-        this.taskCatalog = taskCatalog;
+        this.bikeRegistry = registryCreator.getBikeRegistry();
+        this.taskCatalog = registryCreator.getRepairTaskCatalog();
+        this.customerRegistry = registryCreator.getCustomerRegistry();
+        this.repairOrderRegistry = registryCreator.getRepairOrderRegistry();
     }
 
     /**
@@ -78,11 +87,47 @@ public class Controller {
     }
 
     /**
-     * Ends the current repair session and returns the completed repair order.
+     * Ends the current repair session, saves the resulting repair order in the
+     * repair order registry, and returns it.
      *
-     * @return The {@link RepairOrder} summarising all repair details.
+     * @return The {@link RepairOrderDTO} summarising all repair details.
      */
-    public RepairOrder endRepair() {
-        return repairShop.endRepair();
+    public RepairOrderDTO endRepair() {
+        RepairOrderDTO repairOrder = repairShop.endRepair();
+        repairOrderRegistry.saveRepairOrder(repairOrder);
+        return repairOrder;
+    }
+
+    /**
+     * Searches for a previously saved repair order with the given ID.
+     *
+     * @param repairOrderID The unique identifier of the repair order to find.
+     * @return The matching {@link RepairOrderDTO}, or {@code null} if no repair
+     *         order with the given ID has been saved.
+     */
+    public RepairOrderDTO findRepairOrder(String repairOrderID) {
+        return repairOrderRegistry.findRepairOrderByID(repairOrderID);
+    }
+
+    /**
+     * Searches for all saved repair orders belonging to the customer with the
+     * given ID.
+     *
+     * @param customerID The unique identifier of the customer to search for.
+     * @return A list of the customer's saved repair orders, possibly empty.
+     */
+    public List<RepairOrderDTO> findRepairOrdersForCustomer(String customerID) {
+        return repairOrderRegistry.findRepairOrdersByCustomer(customerID);
+    }
+
+    /**
+     * Searches for a customer with the given ID.
+     *
+     * @param customerID The unique identifier of the customer to find.
+     * @return The matching {@link CustomerDTO}, or {@code null} if no customer
+     *         with the given ID exists in the registry.
+     */
+    public CustomerDTO findCustomer(String customerID) {
+        return customerRegistry.findCustomer(customerID);
     }
 }

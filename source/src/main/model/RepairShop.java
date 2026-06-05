@@ -7,6 +7,7 @@ package model;
 public class RepairShop {
 
     private ActiveRepair currentRepair;
+    private int nextRepairOrderNumber = 1;
 
     /**
      * Creates a new RepairShop ready to accept repair sessions.
@@ -50,11 +51,13 @@ public class RepairShop {
     }
 
     /**
-     * Ends the current repair session and returns the completed repair order.
+     * Ends the current repair session and returns the completed repair order,
+     * assigning it a unique repair order identifier.
      *
-     * @return The {@link RepairOrder} for the finished repair.
+     * @return The {@link RepairOrderDTO} for the finished repair.
      */
-    public RepairOrder endRepair() {
-        return currentRepair.endRepair();
+    public RepairOrderDTO endRepair() {
+        String repairOrderID = "RO-" + nextRepairOrderNumber++;
+        return currentRepair.endRepair(repairOrderID);
     }
 }

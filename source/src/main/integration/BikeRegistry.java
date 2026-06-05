@@ -1,6 +1,7 @@
 package integration;
 
 import model.BikeDTO;
+import model.CustomerDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +14,16 @@ public class BikeRegistry {
     private final Map<String, BikeDTO> bikes = new HashMap<>();
 
     /**
-     * Creates a BikeRegistry pre-loaded with sample bike records.
+     * Creates a BikeRegistry pre-loaded with sample bike records, each linked to
+     * the customer who owns it.
      */
     public BikeRegistry() {
-        bikes.put("BIKE-001", new BikeDTO("BIKE-001", "Alice Svensson"));
-        bikes.put("BIKE-002", new BikeDTO("BIKE-002", "Bob Lindqvist"));
-        bikes.put("BIKE-003", new BikeDTO("BIKE-003", "Carl Johansson"));
+        bikes.put("BIKE-001", new BikeDTO("BIKE-001",
+                new CustomerDTO("CUST-001", "Alice Svensson", "070-111 11 11")));
+        bikes.put("BIKE-002", new BikeDTO("BIKE-002",
+                new CustomerDTO("CUST-002", "Bob Lindqvist", "070-222 22 22")));
+        bikes.put("BIKE-003", new BikeDTO("BIKE-003",
+                new CustomerDTO("CUST-003", "Carl Johansson", "070-333 33 33")));
     }
 
     /**
